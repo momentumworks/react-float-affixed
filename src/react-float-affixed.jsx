@@ -265,9 +265,9 @@ var FloatAffixed = React.createClass({
             });
         }
         return (
-            <Escape ref="escape" to="viewport" style={{overflow:'hidden'}}>
+            <Escape ref={this.setEscapeRef} to="viewport" style={{overflow:'hidden'}}>
                 <div
-                    ref={(r)=>{this._popup = r}}
+                    ref={this.setRef}
                     style={popupStyle}
                     {...props}
                     className={classNames("float-affixed", this.state.schemeName, className)}>
@@ -294,9 +294,16 @@ var FloatAffixed = React.createClass({
             translation: new Vec2(0,0),
         };
     },
+    setRef: function (r) {
+        this._popup = r;
+        this.reposition(this.props)
+    },
+    setEscapeRef: function (r) {
+        this.escape = r
+    },
     componentDidMount: function() {
         this._schemes = parseEdgeAlignProps(this.props.edges, this.props.align);
-        this._anchor = this.props.anchor ? this.props.anchor() : this.refs.escape.escapePoint;
+        this._anchor = this.props.anchor ? this.props.anchor() : this.escape.escapePoint;
         if (!this._anchor)
             /* eslint no-console: 0 */
             console.error("no anchor supplied for float-affixed");
@@ -332,6 +339,9 @@ var FloatAffixed = React.createClass({
         this.reposition(this.props);
     },
     reposition: function(props) {
+        if (this._popup == null || this._anchor == null) {
+            return
+        }
         var prect = viewportRect(this._popup);
         var psize = prect.getSize();
         var arect = viewportRect(this._anchor);
@@ -362,7 +372,7 @@ var FloatAffixed = React.createClass({
         return this._scheme = scheme;
     },
     viewportSize: function() {
-        var { width, height } = this.refs.escape.getSize();
+        var { width, height } = this.escape.getSize();
         return new Vec2(width, height);
     },
 });
